@@ -1,7 +1,13 @@
-# 🪙 Crypto Tracker App
+# 🪙 Crypto Tracker Android App
 
-Aplikasi Android untuk memantau harga pasar Cryptocurrency secara *real-time* (Bitcoin, Ethereum, dll) dalam Rupiah (IDR).
+Aplikasi monitoring harga aset kripto (BTC, ETH, dll) real-time dengan konversi Rupiah (IDR).
 
+## 📋 Prasyarat (Requirements)
+Sebelum menjalankan project, pastikan sudah terinstall:
+* **Android Studio** (Disarankan versi terbaru).
+* **JDK 17** (atau versi yang sesuai dengan `gradle-wrapper`).
+* **Koneksi Internet** (Wajib, untuk fetch data API).
+  
 ## ✨ Fitur Utama
 * 🚀 **Real-time Data:** Harga live update dari pasar.
 * 💰 **IDR Conversion:** Harga otomatis dalam Rupiah.
@@ -13,8 +19,3 @@ Aplikasi Android untuk memantau harga pasar Cryptocurrency secara *real-time* (B
 * **Platform:** Android (Min SDK 24)
 * **API:** CoinGecko API (Public)
 * **Arsitektur:** MVVM (Recommended)
-
-## 📸 Preview
-*(Upload screenshot aplikasimu ke folder 'screenshots' lalu update bagian ini)*
-![App Preview](screenshots/preview.jpg)
-
