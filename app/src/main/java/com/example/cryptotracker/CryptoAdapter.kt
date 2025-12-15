@@ -34,33 +34,33 @@ class CryptoAdapter(
     override fun onBindViewHolder(holder: CryptoViewHolder, position: Int) {
         val coin = cryptoList[position]
 
-        // 1. Set Data Teks
         holder.tvName.text = coin.name
         holder.tvSymbol.text = coin.symbol.uppercase()
 
-        // 2. Format Harga ke Rupiah (Rp 1.000.000)
+        // Format Harga
         val formatRp = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         holder.tvPrice.text = formatRp.format(coin.current_price)
 
-        // 3. Logika Warna & Persentase (Hijau/Merah)
+        // --- BAGIAN BARU: Logika Warna Dinamis ---
         val change = coin.price_change_percentage_24h
-        holder.tvChange.text = String.format("%.2f%%", change)
 
         if (change >= 0) {
-            holder.tvChange.setTextColor(Color.parseColor("#4CAF50")) // Hijau
-            holder.tvChange.text = "+${holder.tvChange.text}"
+            // NAIK: Warna Hijau Neon (#00E676) & Simbol Panah Atas
+            holder.tvChange.text = "+${String.format("%.2f", change)}% ▲"
+            holder.tvChange.setTextColor(Color.parseColor("#00E676"))
         } else {
-            holder.tvChange.setTextColor(Color.parseColor("#F44336")) // Merah
+            // TURUN: Warna Merah Terang (#FF5252) & Simbol Panah Bawah
+            holder.tvChange.text = "${String.format("%.2f", change)}% ▼"
+            holder.tvChange.setTextColor(Color.parseColor("#FF5252"))
         }
+        // ------------------------------------------
 
-        // 4. Load Gambar Logo (Glide)
         Glide.with(holder.itemView.context)
             .load(coin.image)
             .into(holder.imgLogo)
 
-        // 5. Aksi Klik (Fitur Baru)
         holder.itemView.setOnClickListener {
-            onItemClick(coin) // Kirim data coin yang diklik ke MainActivity
+            onItemClick(coin)
         }
     }
 
