@@ -1,51 +1,67 @@
 package com.example.cryptotracker
 
 import android.os.Bundle
-import android.util.Log
+import android.widget.ProgressBar
+import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class MainActivity : AppCompatActivity() {
 
-    // Siapkan variabel untuk RecyclerView
     private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: CryptoAdapter
+    private lateinit var progressBar: ProgressBar
+    private lateinit var swipeRefresh: SwipeRefreshLayout
+
+    // Memanggil ViewModel yang sudah dibuat di file sebelah
+    private val viewModel: CryptoViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // 1. Kenalan sama RecyclerView di layar
+        // 1. Setup UI
         recyclerView = findViewById(R.id.recyclerView)
+        progressBar = findViewById(R.id.progressBar)
+        swipeRefresh = findViewById(R.id.swipeRefresh)
+
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // 2. Ambil data
-        fetchCryptoData()
+        // 2. Observasi (Pantau) Data
+        observeViewModel()
+
+        // 3. Ambil Data Awal
+        viewModel.fetchCoins()
+
+        // 4. Aksi Swipe Refresh
+        swipeRefresh.setOnRefreshListener {
+            viewModel.fetchCoins()
+        }
     }
 
-    private fun fetchCryptoData() {
-        RetrofitClient.instance.getCoins().enqueue(object : Callback<List<CryptoModel>> {
-            override fun onResponse(
-                call: Call<List<CryptoModel>>,
-                response: Response<List<CryptoModel>>
-            ) {
-                if (response.isSuccessful) {
-                    val cryptoList = response.body()
-
-                    // 3. Kalau data ada, serahkan ke Adapter (Koki)
-                    if (cryptoList != null) {
-                        val adapter = CryptoAdapter(cryptoList)
-                        recyclerView.adapter = adapter
-                    }
-                }
+    private fun observeViewModel() {
+        viewModel.cryptoList.observe(this) { list ->
+            // Saat data masuk, masukkan ke Adapter + Fitur Klik
+            adapter = CryptoAdapter(list) { coin ->
+                Toast.makeText(this, "Kamu memilih ${coin.name}", Toast.LENGTH_SHORT).show()
             }
+            recyclerView.adapter = adapter
+        }
 
-            override fun onFailure(call: Call<List<CryptoModel>>, t: Throwable) {
-                Log.e("CEK_DATA", "Error: ${t.message}")
+        viewModel.isLoading.observe(this) { isLoading ->
+            if (isLoading) {
+                progressBar.visibility = android.view.View.VISIBLE
+            } else {
+                progressBar.visibility = android.view.View.GONE
+                swipeRefresh.isRefreshing = false
             }
-        })
+        }
+
+        viewModel.errorMessage.observe(this) { message ->
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
     }
 }

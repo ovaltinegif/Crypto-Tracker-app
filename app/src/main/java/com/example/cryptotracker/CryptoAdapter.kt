@@ -7,19 +7,22 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide // Import Glide
+import com.bumptech.glide.Glide
 import java.text.NumberFormat
 import java.util.Locale
 
-class CryptoAdapter(private val cryptoList: List<CryptoModel>) :
-    RecyclerView.Adapter<CryptoAdapter.CryptoViewHolder>() {
+// Tambahkan parameter 'onItemClick' di sini agar Activity bisa menangani klik
+class CryptoAdapter(
+    private val cryptoList: List<CryptoModel>,
+    private val onItemClick: (CryptoModel) -> Unit // Callback function
+) : RecyclerView.Adapter<CryptoAdapter.CryptoViewHolder>() {
 
     class CryptoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tvName)
         val tvSymbol: TextView = itemView.findViewById(R.id.tvSymbol)
         val tvPrice: TextView = itemView.findViewById(R.id.tvPrice)
-        val tvChange: TextView = itemView.findViewById(R.id.tvChange) // Baru
-        val imgLogo: ImageView = itemView.findViewById(R.id.imgLogo)   // Baru
+        val tvChange: TextView = itemView.findViewById(R.id.tvChange)
+        val imgLogo: ImageView = itemView.findViewById(R.id.imgLogo)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CryptoViewHolder {
@@ -31,28 +34,34 @@ class CryptoAdapter(private val cryptoList: List<CryptoModel>) :
     override fun onBindViewHolder(holder: CryptoViewHolder, position: Int) {
         val coin = cryptoList[position]
 
+        // 1. Set Data Teks
         holder.tvName.text = coin.name
         holder.tvSymbol.text = coin.symbol.uppercase()
 
-        // 1. Format Harga (Rupiah)
+        // 2. Format Harga ke Rupiah (Rp 1.000.000)
         val formatRp = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         holder.tvPrice.text = formatRp.format(coin.current_price)
 
-        // 2. Logika Warna & Persen (Hijau vs Merah)
+        // 3. Logika Warna & Persentase (Hijau/Merah)
         val change = coin.price_change_percentage_24h
         holder.tvChange.text = String.format("%.2f%%", change)
 
         if (change >= 0) {
             holder.tvChange.setTextColor(Color.parseColor("#4CAF50")) // Hijau
-            holder.tvChange.text = "+${holder.tvChange.text}" // Tambah tanda +
+            holder.tvChange.text = "+${holder.tvChange.text}"
         } else {
             holder.tvChange.setTextColor(Color.parseColor("#F44336")) // Merah
         }
 
-        // 3. Load Gambar dari Internet pake Glide
+        // 4. Load Gambar Logo (Glide)
         Glide.with(holder.itemView.context)
             .load(coin.image)
             .into(holder.imgLogo)
+
+        // 5. Aksi Klik (Fitur Baru)
+        holder.itemView.setOnClickListener {
+            onItemClick(coin) // Kirim data coin yang diklik ke MainActivity
+        }
     }
 
     override fun getItemCount(): Int = cryptoList.size
